@@ -59,7 +59,6 @@ def _add_to_queue(
     pos_x: float,
     pos_y: float,
     fast_mode: bool,
-    burn_mode: str,
     emphasized_words: list[str],
     auto_emphasis: bool,
 ):
@@ -94,7 +93,6 @@ def _add_to_queue(
                 "pos_x": pos_x,
                 "pos_y": pos_y,
                 "fast": fast_mode,
-                "burn_mode": burn_mode,
                 "emphasized_words": emphasized_words,
                 "auto_emphasis": auto_emphasis,
                 "resolved_emphasis": [],
@@ -151,7 +149,6 @@ def _process_queue():
                     output_path,
                     position_xy=(job["pos_x"], job["pos_y"]),
                     fast=job["fast"],
-                    mode=job["burn_mode"],
                 )
 
                 job["output_path"] = str(burn_result["output_path"])
@@ -243,7 +240,6 @@ pos_x = st.slider("Horizontal position (%)", 0, 100, 50, step=1)
 pos_y = st.slider("Vertical position (%)", 0, 100, 85, step=1)
 
 fast_mode = st.checkbox("Fast render (ultrafast preset, 1280px cap)", value=True)
-burn_mode = st.radio("Render engine", options=["ffmpeg", "moviepy"], index=1)
 
 auto_emphasis = st.checkbox(
     "Auto-detect emphasis words from transcript",
@@ -265,7 +261,6 @@ with col_add:
             pos_x / 100,
             pos_y / 100,
             fast_mode,
-            burn_mode,
             _parse_emphasis(emphasis_input),
             auto_emphasis,
         )
@@ -288,7 +283,7 @@ else:
         expanded = job["status"] in {"error", "processing"}
         with st.expander(label, expanded=expanded):
             st.write(
-                f"Style: {job['style']} | Fast: {job['fast']} | Engine: {job['burn_mode']} | "
+                f"Style: {job['style']} | Fast: {job['fast']} | "
                 f"Pos: {int(job['pos_x']*100)}%, {int(job['pos_y']*100)}%"
             )
             emphasized_words = job.get("resolved_emphasis") or job.get("emphasized_words") or []

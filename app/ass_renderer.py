@@ -5,7 +5,7 @@ Generate ASS subtitle scripts for fast FFmpeg burning.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional, Tuple
 
 
 STYLE_TEMPLATES = {
@@ -62,6 +62,9 @@ STYLE_TEMPLATES = {
     },
 }
 
+PLAY_RES_X = 1280
+PLAY_RES_Y = 720
+
 
 def _fmt_time(t: float) -> str:
     h = int(t // 3600)
@@ -75,15 +78,20 @@ def _clean(text: str) -> str:
     return text.replace(",", " ").replace("{", "").replace("}", "").strip()
 
 
-def build_ass(captions: List[Dict], style_key: str, path: Path) -> Path:
+def build_ass(
+    captions: List[Dict],
+    style_key: str,
+    path: Path,
+    pos_xy: Optional[Tuple[float, float]] = None,
+) -> Path:
     style = STYLE_TEMPLATES.get(style_key, STYLE_TEMPLATES["hormozi"])
     lines = []
     lines.append("[Script Info]")
     lines.append("ScriptType: v4.00+")
     lines.append("WrapStyle: 2")
     lines.append("ScaledBorderAndShadow: yes")
-    lines.append("PlayResX: 1280")
-    lines.append("PlayResY: 720")
+    lines.append(f"PlayResX: {PLAY_RES_X}")
+    lines.append(f"PlayResY: {PLAY_RES_Y}")
     lines.append("")
     lines.append("[V4+ Styles]")
     fields = [
@@ -139,6 +147,10 @@ def build_ass(captions: List[Dict], style_key: str, path: Path) -> Path:
                 text_parts.append(txt)
         # wrap into lines separated by \N (already pre-wrapped in captions if needed)
         line_text = " ".join(text_parts)
+        if pos_xy:
+            x = int(pos_xy[0] * PLAY_RES_X)
+            y = int(pos_xy[1] * PLAY_RES_Y)
+            line_text = r"{\pos(%d,%d)}%s" % (x, y, line_text)
         start = _fmt_time(cap["start"])
         end = _fmt_time(cap["end"])
         evt = f"Dialogue: 0,{start},{end},{style['Name']},,0,0,0,,{line_text}"

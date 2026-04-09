@@ -47,7 +47,6 @@ def _process_video_file(
             output_path,
             position_xy=(pos_x, pos_y),
             fast=fast,
-            mode="moviepy",
         )
 
         return {
@@ -69,7 +68,6 @@ async def process_video(
     file: UploadFile = File(...),
     style: str = Form("hormozi"),
     emphasized: str = Form(""),
-    position: str = Form("bottom"),  # kept for backward compatibility
     pos_x: float = Form(0.5),
     pos_y: float = Form(0.9),
     fast: bool = Form(True),
